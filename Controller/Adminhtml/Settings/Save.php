@@ -87,7 +87,7 @@ class Save extends \Magento\Backend\App\Action
      */
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('Emagicone_Connector::edit');
+        return $this->_authorization->isAllowed('Emagicone_Connector::settings_edit');
     }
 
     /**
@@ -115,12 +115,7 @@ class Save extends \Magento\Backend\App\Action
                 }
 
                 $this->_objectManager->get('Magento\Backend\Model\Session')->setFormData(false);
-
-                if ($this->getRequest()->getParam('back')) {
-                    $this->_redirect('/');
-                } else {
-                    $this->_redirect('*/settings/edit');
-                }
+                $this->_redirect('*/settings/edit');
                 return;
             }
         } catch (\Magento\Framework\Model\Exception $e) {

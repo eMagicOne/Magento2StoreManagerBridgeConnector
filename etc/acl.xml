@@ -5,8 +5,8 @@
             <resource id="Magento_Backend::admin">
                 <resource id="Emagicone_Connector::settings" title="Magento Store Manager Connector" sortOrder="110">
                     <resource id="Emagicone_Connector::setting" title="Settings">
-                        <resource id="Emagicone_Connector::view" title="View" sortOrder="10"/>
-                        <resource id="Emagicone_Connector::edit" title="Edit" sortOrder="20"/>
+                        <resource id="Emagicone_Connector::settings_view" title="View" sortOrder="10"/>
+                        <resource id="Emagicone_Connector::settings_edit" title="Edit" sortOrder="20"/>
                     </resource>
                 </resource>
             </resource>

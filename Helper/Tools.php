@@ -121,7 +121,7 @@ class Tools
         if (!self::$logger) {
             $writer = self::getObjectManager()->create(
                 'Zend\Log\Writer\Stream',
-                ['streamOrUrl' => BP . '/var/log/emagicone_mobassistantconnector.log']
+                ['streamOrUrl' => BP . '/var/log/emagicone_connector.log']
             );
             self::$logger = self::getObjectManager()->create('Zend\Log\Logger');
             self::$logger->addWriter($writer);
