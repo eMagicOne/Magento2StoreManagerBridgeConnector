@@ -57,7 +57,7 @@ class Edit extends \Magento\Backend\App\Action
      */
     protected function _isAllowed()
     {
-        return $this->_authorization->isAllowed('Emagicone_Connector::view');
+        return $this->_authorization->isAllowed('Emagicone_Connector::settings_view');
     }
 
     /**

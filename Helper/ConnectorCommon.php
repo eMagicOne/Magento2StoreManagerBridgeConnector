@@ -34,9 +34,9 @@ class ConnectorCommon
     private $request_params;
     private $db_tables = [];
     private $db_views = [];
-    private $handled_tables = []; /* Array of processed tables */
-    private $table_sizes = []; /* Information about size of each table */
-    private $db_size = 0; /* Size of all data in database which will be processed */
+    private $handled_tables = [];           /* Array of processed tables */
+    private $table_sizes = [];              /* Information about size of each table */
+    private $db_size = 0;                   /* Size of all data in database which will be processed */
     private $log_file_reset = false;
     private $db_file_handler;
     private $tmp_folder_path;
@@ -69,8 +69,6 @@ class ConnectorCommon
     const TMP_FILE_PREFIX                    = 'm1bridgetmp_';
     const INTERMEDIATE_FILE_NAME             = 'sm_intermediate.txt';
     const DB_FILE_MAIN                       = 'em1_bridge_db_dump';
-    const DB_FILE_COMPRESSION_NO             = 'em1_bridge_db_dump.sql';
-    const DB_FILE_COMPRESSION_YES            = 'em1_bridge_db_dump.gz';
     const DB_DATA_TMP                        = 'em1_dump_data_tmp.txt';
     const FILE_TMP_GET_SQL                   = 'em1_tmp_get_sql.txt';
     const FILE_TMP_PUT_SQL                   = 'em1_tmp_put_sql.txt';
@@ -178,7 +176,6 @@ class ConnectorCommon
             $this->response = $this->generateError($this->br_errors['module_disabled']);
         } else {
             $this->response = $this->checkAuth();
-
             if (!$this->response) {
                 // Uncomment if have some troubles with getting data
                 //
@@ -683,8 +680,10 @@ class ConnectorCommon
     private function getDumpData()
     {
         $content = false;
-        $file    = $this->tmp_folder_path.'/'.self::DB_DATA_TMP;
-        $file_db = $this->tmp_folder_path.'/'.self::DB_FILE_COMPRESSION_NO;
+        $file    = $this->tmp_folder_path . '/' . self::DB_DATA_TMP;
+        $file_db = $this->tmp_folder_path . '/' . self::DB_FILE_MAIN
+            . $this->getPartNumber($this->dump_file_part_number)
+            . self::DB_FILE_EXT_COMPRESSION_NO;
 
         if ($this->shop_cart->fileExists($file)) {
             if ($this->shop_cart->fileExists($file_db) && (time() - $this->shop_cart->filemtime($file_db)) > 600) {
@@ -809,17 +808,22 @@ class ConnectorCommon
             );
         }
 
-        $tablesAndViews = array_merge($this->db_tables, $this->db_views);
+        $tablesAndViews     = array_merge($this->db_tables, $this->db_views);
+        $limitQuerySize     = ((int)$this->bridge_options['limit_query_size'] * 1024);
         foreach ($result as $item) {
             if (in_array($item['Name'], $tablesAndViews)) {
-                $item['Rows'] = empty($item['Rows']) ? 0 : $item['Rows'];
-                $tabinfo[0] += $item['Rows'];
-                $tabinfo[$item['Name']] = $item['Rows'];
-                $tabsize[$item['Name']] = 1
-                    + round($this->bridge_options['limit_query_size'] * 1024 / ($item['Avg_row_length'] + 1));
-                $this->table_sizes[$item['Name']]['size'] = $item['Data_length'] + $item['Index_length'];
-                $this->table_sizes[$item['Name']]['rows'] = $item['Rows'];
-                $this->db_size += $item['Data_length'] + $item['Index_length'];
+                $tableSize      = (int)$item['Data_length'] + (int)$item['Index_length'];
+                $tableRows      = (int)(empty($item['Rows']) ? 0 : $item['Rows']);
+                $tableAvgSize   = (int)($item['Avg_row_length'] <= 0 ? 1 : $item['Avg_row_length']);
+
+                $item['Rows']   = $tableRows;
+                $tabinfo[0]     += $tableRows;
+                $tabinfo[$item['Name']] = $tableRows;
+
+                $tabsize[$item['Name']] = ($tableRows == 0 ? 1 : 1 + round($limitQuerySize/$tableAvgSize));
+                $this->table_sizes[$item['Name']]['size'] = $tableSize;
+                $this->table_sizes[$item['Name']]['rows'] = $tableRows;
+                $this->db_size += $tableSize;
             }
         }
 
@@ -841,6 +845,7 @@ class ConnectorCommon
         }
 
         $this->shop_cart->execSql('SET SQL_QUOTE_SHOW_CREATE = 1');
+        $this->shop_cart->execSql('SET @@session.time_zone = \'+00:00\'');
 
         // Form database dump file
         foreach ($tablesAndViews as $table) {
@@ -877,6 +882,7 @@ class ConnectorCommon
 
         $table_empty = true;
         $result = $this->shop_cart->getSqlResults("SHOW CREATE TABLE `{$table}`", self::NUMERIC);
+
         if ($result === false) {
             return $this->generateError(
                 'Error selecting table structure. Error: '.$this->shop_cart->error_no.'; '
@@ -910,7 +916,6 @@ class ConnectorCommon
         }
 
         $field = 0;
-
         foreach ($result as $col) {
             $numeric_column[$field++] = preg_match('/^(\w*int|year)/', $col[1]) ? 1 : 0;
         }
@@ -924,7 +929,18 @@ class ConnectorCommon
         $fields = $field;
         $limit  = $tabsize[$table];
         $i      = 0;
-        $query  = "SELECT * FROM `{$table}` LIMIT {$from}, {$limit}";
+
+        // Check if table got rows to do limitations
+        $limitQueryPart = '';
+        if ((int)$tabinfo[$table] > 0) {
+            if ($from == 0) {
+                $limitQueryPart = 'LIMIT ' . (int)$limit;
+            } else {
+                $limitQueryPart = 'LIMIT ' . (int)$from . ', ' . (int)$limit;
+            }
+        }
+
+        $query  = "SELECT * FROM `{$table}`" . $limitQueryPart;
         $result = $this->shop_cart->getSqlResults($query, self::NUMERIC);
 
         if ($result === false) {
@@ -935,13 +951,12 @@ class ConnectorCommon
         }
 
         $count_result = count($result);
-
         if (in_array($table, $this->db_views, true)) {
             $handled_tables[] = $table;
             return true;
         }
 
-        if ($count_result > 0) {
+        if ($count_result > 0 && in_array($table, $this->db_tables, true)) {
             $this->dbFileWrite("INSERT INTO `{$table}` VALUES");
         }
 
@@ -986,7 +1001,7 @@ class ConnectorCommon
             $query  = "SELECT * FROM {$table} LIMIT {$from}, {$limit}";
             $result = $this->shop_cart->getSqlResults($query, self::NUMERIC);
 
-            if (!$result) {
+            if ($result === false) {
                 return $this->generateError(
                     "Error selecting data from table `{$table}`. Error: ".$this->shop_cart->error_no.'; '
                     .$this->shop_cart->error_msg
@@ -1017,7 +1032,9 @@ class ConnectorCommon
         $this->putLog(self::GET_SQL_CANCEL_PARAM);
         $path_sm_tmp_get_sql_txt     = $this->tmp_folder_path . '/' . self::FILE_TMP_GET_SQL;
         $path_dump_data_tmp_txt      = $this->tmp_folder_path . '/' . self::DB_DATA_TMP;
-        $path_em1_bridge_db_dump_sql = $this->tmp_folder_path . '/' . self::DB_FILE_COMPRESSION_NO;
+        $path_em1_bridge_db_dump_sql = $this->tmp_folder_path . '/' . self::DB_FILE_MAIN
+            . $this->getPartNumber($this->dump_file_part_number)
+            . self::DB_FILE_EXT_COMPRESSION_NO;
 
         if ($this->shop_cart->fileExists($path_sm_tmp_get_sql_txt)) {
             $this->shop_cart->unlink($path_sm_tmp_get_sql_txt);
@@ -1063,14 +1080,16 @@ class ConnectorCommon
     private function generateArchive()
     {
         if ($this->bridge_options['allow_compression']) {
-            $file_gz = self::DB_FILE_MAIN.$this->getPartNumber($this->dump_file_part_number)
-                .self::DB_FILE_EXT_COMPRESSION_YES;
-            $fname_gz_path = $this->tmp_folder_path."/$file_gz";
-            $fp_gz = $this->shop_cart->gzFileOpen($fname_gz_path, "wb{$this->bridge_options['compress_level']}");
+            $file_gz = self::DB_FILE_MAIN . $this->getPartNumber($this->dump_file_part_number)
+                . self::DB_FILE_EXT_COMPRESSION_YES;
+            $fname_gz_path = $this->tmp_folder_path . "/$file_gz";
+            $fp_gz = $this->shop_cart->gzFileOpen(
+                $fname_gz_path,
+                "wb{$this->bridge_options['compress_level']}"
+            );
 
-            $fname_path = $this->tmp_folder_path."/$this->dump_file_current";
-            $fp = $this->shop_cart->fileOpen($fname_path, 'r');
-
+            $fname_path = $this->tmp_folder_path . "/$this->dump_file_current";
+            $fp         = $this->shop_cart->fileOpen($fname_path, 'r');
             if ($fp_gz && $fp) {
                 while (!feof($fp)) {
                     $content = $this->shop_cart->fileRead($fp, $this->bridge_options['package_size']);
@@ -2324,13 +2343,13 @@ class ConnectorCommon
 
     private function generateFileData($file, $allowCompression)
     {
-        $file_size = $this->shop_cart->fileSize($file);
+        $file_size = $this->shop_cart->fileSize("$this->tmp_folder_path/" . $file);
         $output = "0\r\n" . ($allowCompression ? '1' : '0') . '|';
         $div_last = $file_size % $this->bridge_options['package_size'];
         $output .= $div_last == 0
             ? ($file_size / $this->bridge_options['package_size'])
             : (($file_size - $div_last) / $this->bridge_options['package_size'] + 1);
-        $output .= "|$file_size|\r\n" . basename($file) . "\r\n" . md5_file($file);
+        $output .= "|$file_size|\r\n" . basename($file) . "\r\n" . md5_file("$this->tmp_folder_path/" . $file);
 
         $headers = false;
         if (!headers_sent()) {

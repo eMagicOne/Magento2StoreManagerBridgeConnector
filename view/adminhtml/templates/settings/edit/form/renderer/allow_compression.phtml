@@ -29,7 +29,7 @@
             <input type="checkbox" id="allow_compression_switcher" name="allow_compression" value="1"
                 <?php
                     echo $storedSettings['allow_compression'] == 1 ? 'checked' : '';
-                    echo $tmpBlock->getAuthorization()->isAllowed('Emagicone_Connector::edit')
+                    echo $tmpBlock->getAuthorization()->isAllowed('Emagicone_Connector::settings_edit')
                         ? ''
                         : ' disabled="disabled"';
                 ?>

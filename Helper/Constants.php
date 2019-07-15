@@ -25,8 +25,8 @@ namespace Emagicone\Connector\Helper;
 
 class Constants
 {
-    const MODULE_VERSION            = '1.0.0';
-    const REVISION                  = 1;
+    const MODULE_VERSION            = '1.0.4';
+    const REVISION                  = 2;
     const MODULE_NAME               = 'Emagicone_Connector';
     const OPTIONS_NAME              = 'emagicone/connector/settings';
     const RESPONSE_KEY_OUTPUT       = 'output';

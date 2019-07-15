@@ -23,7 +23,7 @@ use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
 
 /**
  * Class FailedLogin
- * @package Emagicone\Mobassistantconnector\Model\ResourceModel
+ * @package Emagicone\Connector\Model\ResourceModel
  */
 class FailedLogin extends AbstractDb
 {

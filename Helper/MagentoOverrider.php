@@ -470,7 +470,7 @@ class MagentoOverrider extends ConnectorCore
 
     public function stat($path)
     {
-        return Tools::getFile()->stat($path);
+        return @Tools::getFile()->stat($path);
     }
 
     public function search($path, $pattern = '*', $onlyDir = false)

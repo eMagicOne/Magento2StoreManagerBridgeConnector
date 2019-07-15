@@ -37,8 +37,24 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container
         parent::_construct();
 
         $this->buttonList->remove('back');
-
-        if (!($this->_isAllowedAction('Emagicone_Connector::edit'))) {
+        if ($this->_isAllowedAction('Emagicone_Connector::settings_edit')) {
+            $this->buttonList->add(
+                'save-and-continue',
+                [
+                    'label' => __('Save and Continue Edit'),
+                    'class' => 'save',
+                    'data_attribute' => [
+                        'mage-init' => [
+                            'button' => [
+                                'event' => 'saveAndContinueEdit',
+                                'target' => '#edit_form'
+                            ]
+                        ]
+                    ]
+                ],
+                -100
+            );
+        } else {
             $this->buttonList->remove('save');
         }
     }
@@ -52,20 +68,6 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container
     public function _isAllowedAction($resourceId)
     {
         return $this->_authorization->isAllowed($resourceId);
-    }
-
-    /**
-     * Getter of url for "Save and Continue" button
-     * tab_id will be replaced by desired by JS later
-     *
-     * @return string
-     */
-    public function _getSaveAndContinueUrl()
-    {
-        return $this->getUrl(
-            '*/*/save',
-            ['_current' => true, 'back' => 'edit', 'active_tab' => '{{tab_id}}']
-        );
     }
 
     /**

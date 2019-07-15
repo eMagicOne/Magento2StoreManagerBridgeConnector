@@ -33,7 +33,7 @@
             $dbTables = \Emagicone\Connector\Helper\Tools::getResource()->getConnection()
                 ->fetchCol('SHOW TABLES');
             $count = count($dbTables);
-            $isElementDisabled = $tmpBlock->getAuthorization()->isAllowed('Emagicone_Connector::edit')
+            $isElementDisabled = $tmpBlock->getAuthorization()->isAllowed('Emagicone_Connector::settings_edit')
                 ? ''
                 : 'disabled="disabled"';
 
