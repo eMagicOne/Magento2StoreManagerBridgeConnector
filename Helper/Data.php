@@ -39,8 +39,6 @@ class Data extends AbstractHelper
 
     const SESSION_CACHE_ID = 'emagicone_connector_session_key';
 
-    const XML_PATH_EMAGICONE_CONNECTOR = 'emagicone_connector';
-
     const SAVE_DIR_NAME = '/emagicone';
 
     /**
@@ -145,13 +143,37 @@ class Data extends AbstractHelper
     }
 
     /**
+     * @return array
+     */
+    public function getRequiredTables()
+    {
+        $requiredTables = $this->_getFieldValue('settings', 'required_tables');
+        if (is_string($requiredTables) && !empty($requiredTables)) {
+            return explode(',', $requiredTables);
+        }
+        return [];
+    }
+
+    /**
+     * @return array
+     */
+    public function getRequiredTablesRegexp()
+    {
+        $requiredTablesRegexp = $this->_getFieldValue('settings', 'required_tables_regexp');
+        if (is_string($requiredTablesRegexp) && !empty($requiredTablesRegexp)) {
+            return explode(',', $requiredTablesRegexp);
+        }
+        return [];
+    }
+
+    /**
      * @param $groupId
      * @param $fieldId
      * @return mixed
      */
     private function _getFieldValue($groupId, $fieldId)
     {
-        return $this->_scopeConfig->getValue(self::XML_PATH_EMAGICONE_CONNECTOR . '/' . $groupId . '/' . $fieldId);
+        return $this->_scopeConfig->getValue(GlobalConstants::XML_PATH_EMAGICONE_CONNECTOR . '/' . $groupId . '/' . $fieldId);
     }
 
     /**
@@ -239,14 +261,7 @@ class Data extends AbstractHelper
      */
     public function deleteConfigs()
     {
-        $configPaths = [
-            self::XML_PATH_EMAGICONE_CONNECTOR . '/access/enable',
-            self::XML_PATH_EMAGICONE_CONNECTOR . '/access/login',
-            self::XML_PATH_EMAGICONE_CONNECTOR . '/access/password',
-            self::XML_PATH_EMAGICONE_CONNECTOR . '/settings/package_size',
-            self::XML_PATH_EMAGICONE_CONNECTOR . '/settings/excluded_tables'
-        ];
-        foreach ($configPaths as $path) {
+        foreach (GlobalConstants::CONFIG_PATHS as $path) {
             $this->_config->deleteConfig($path);
         }
     }

@@ -41,6 +41,7 @@
                     <label>Exclude Tables</label>
                     <source_model>Emagicone\Connector\Model\Config\Source\Tables</source_model>
                     <comment>Do not get data from tables selected here. Use this to reduce size of the data retrieved from module</comment>
+                    <can_be_empty>1</can_be_empty>
                 </field>
             </group>
         </section>

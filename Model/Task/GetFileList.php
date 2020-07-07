@@ -68,6 +68,6 @@ class GetFileList extends AbstractTask implements TaskInterface
         $fileName = 'file_list.txt';
         $filePath = $model->saveDataToFile($fileName, $result)->compressFile($fileName);
 
-        $this->setResponseData($model->getFileDataResponse($filePath));
+        $this->setResponseData($model->getFileDataResponse($filePath, true));
     }
 }

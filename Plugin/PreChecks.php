@@ -134,7 +134,7 @@ class PreChecks
                 if ($this->isHashInOldFormat($hash)) {
                     return [
                         'status' => false,
-                        'response_code' => $subject::ERROR_CODE_COMMON,
+                        'response_code' => $subject::ERROR_CODE_AUTHENTICATION,
                         'message' => 'The current Store Manager version is incompatible with Bridge Connector extension version. To solve this issue, please, update the Store Manager to the latest version.'
                     ];
                 }

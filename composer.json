@@ -6,7 +6,7 @@
     ],
     "description": "Install Magento Store Manager Connector module to fluently connect Store Manager desktop application to Magento database. Increase speed of data management, take advantage of simplicity and reliability with all-in-one Store Manager via Magento Store Manager Bridge Connector.",
     "type": "magento2-module",
-    "version": "2.3.1",
+    "version": "2.3.2",
     "require": {
       "emagicone/module-core": ">=1.0.3"
     },

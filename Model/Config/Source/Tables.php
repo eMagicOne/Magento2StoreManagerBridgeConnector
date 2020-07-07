@@ -20,7 +20,8 @@ namespace Emagicone\Connector\Model\Config\Source;
 
 use Magento\Backup\Model\ResourceModel\Db;
 use Magento\Framework\Option\ArrayInterface;
-
+use Emagicone\Connector\Helper\Data;
+use Emagicone\Connector\Helper\GlobalConstants;
 /**
  * Class Tables
  *
@@ -35,15 +36,20 @@ class Tables implements ArrayInterface
      */
     private $_resource;
 
+    private $_helper;
+
     /**
      * Tables constructor.
      *
      * @param Db $resource
+     * @param Data $_helper
      */
     public function __construct(
-        Db $resource
+        Db $resource,
+        Data $_helper
     ) {
         $this->_resource = $resource;
+        $this->_helper = $_helper;
     }
 
     /**
@@ -51,7 +57,7 @@ class Tables implements ArrayInterface
      */
     public function toOptionArray()
     {
-        $tables = $this->_resource->getTables();
+        $tables = $this->filterTables($this->_resource->getTables());
         $returnArray = [];
         foreach ($tables as $table) {
             $returnArray[] = [
@@ -60,5 +66,16 @@ class Tables implements ArrayInterface
             ];
         }
         return $returnArray;
+    }
+
+    private function filterTables($tables)
+    {
+        $requiredTables = $this->_helper->getRequiredTables();
+        $requiredTablesRegexp = $this->_helper->getRequiredTablesRegexp();
+        $tables = array_diff($tables, $requiredTables);
+        foreach ($requiredTablesRegexp as $regexp) {
+            $tables = preg_grep($regexp, $tables, PREG_GREP_INVERT);
+        }
+        return $tables;
     }
 }
