@@ -16,32 +16,23 @@
  *   along with Magento Store Manager Connector.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Emagicone\Connector\Setup;
+namespace Emagicone\Connector\Api;
 
-use Emagicone\Connector\Helper\Data;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\Setup\UninstallInterface;
+use Emagicone\Connector\Exception\BridgeConnectorException;
 
 /**
- * Class Install
+ * Interface TaskRepositoryInterface
  *
- * @package Emagicone\Connector\Uninstall
+ * @author   Vitalii Drozd <vitaliidrozd@kommy.net>
+ * @license  https://emagicone.com/ eMagicOne Ltd. License
+ * @link     https://emagicone.com/
  */
-class Uninstall implements UninstallInterface
+interface TaskRepositoryInterface
 {
-    private $data;
-
-    public function __construct(
-        Data $data
-    ) {
-        $this->data = $data;
-    }
-
-    public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context)
-    {
-        $setup->startSetup();
-        $this->data->deleteConfigs();
-        $setup->endSetup();
-    }
+    /**
+     * @param string $taskName
+     * @return TaskInterface
+     * @throws BridgeConnectorException
+     */
+    public function get($taskName);
 }

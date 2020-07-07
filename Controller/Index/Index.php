@@ -18,100 +18,98 @@
 
 namespace Emagicone\Connector\Controller\Index;
 
-use Emagicone\Connector\Helper\Constants;
+use Emagicone\Connector\Api\TaskRepositoryInterface;
+use Emagicone\Connector\Exception\BridgeConnectorException;
+use Magento\Framework\App\Action\Action;
+use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\CsrfAwareActionInterface;
 use Magento\Framework\App\Request\InvalidRequestException;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\ResponseInterface;
-use Magento\Framework\App\Action\Action;
-use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\Controller\ResultInterface;
 
 /**
  * Class Index
- * @package Emagicone\Connector\Controller\Index
+ *
+ * @author   Vitalii Drozd <vitaliidrozd@kommy.net>
+ * @license  https://emagicone.com/ eMagicOne Ltd. License
+ * @link     https://emagicone.com/
  */
 class Index extends Action implements CsrfAwareActionInterface
 {
     /**
-     * Dispatch request
+     * @var TaskRepositoryInterface
+     */
+    private $_taskRepository;
+
+    /**
+     * @var array
+     */
+    private $_requestData;
+
+    /**
+     * Index constructor.
      *
-     * @return \Magento\Framework\Controller\ResultInterface|ResponseInterface
-     * @throws \Magento\Framework\Exception\NotFoundException
+     * @param TaskRepositoryInterface $taskRepository
+     * @param Context $context
+     */
+    public function __construct(
+        TaskRepositoryInterface $taskRepository,
+        Context $context
+    ) {
+        $this->_taskRepository = $taskRepository;
+        parent::__construct($context);
+    }
+
+    /**
+     * @return ResponseInterface|ResultInterface
+     * @throws BridgeConnectorException
      */
     public function execute()
     {
-        $shopCartOverrider = $this->_objectManager->create(
-            'Emagicone\Connector\Helper\MagentoOverrider',
-            [
-                'module_name'    => Constants::MODULE_NAME,
-                'options_name'   => Constants::OPTIONS_NAME,
-                'request'        => $this->_request,
-                'object_manager' => $this->_objectManager
-            ]
+        $this->_loadRequestData();
+
+        $taskName = $this->_requestData['task'];
+        $taskObject = $this->_taskRepository->get($taskName);
+        $taskObject->setRequestData($this->_requestData)->proceed();
+
+        return $this->getResponse()->setBody(
+            is_array($taskObject->getResponseData())
+                ? json_encode($taskObject->getResponseData())
+                : (string)$taskObject->getResponseData()
         );
-
-        $common_bridge = $this->_objectManager->create(
-            'Emagicone\Connector\Helper\ConnectorCommon',
-            [
-                'shop_cart_overrider' => $shopCartOverrider,
-                'module_version'      => Constants::MODULE_VERSION,
-                'revision'            => Constants::REVISION,
-                'responseKeyOutput'   => Constants::RESPONSE_KEY_OUTPUT,
-                'responseKeyHeaders'  => Constants::RESPONSE_KEY_HEADERS,
-                'maxKeyLifetime'      => Constants::MAX_KEY_LIFETIME,
-            ]
-        );
-
-        $response = $common_bridge->getResponse();
-
-        if ($response && is_array($response)) {
-            if (isset($response[Constants::RESPONSE_KEY_HEADERS])
-                && is_array($response[Constants::RESPONSE_KEY_HEADERS])
-            ) {
-                $count = count($response[Constants::RESPONSE_KEY_HEADERS]);
-
-                for ($i = 0; $i < $count; $i++) {
-                    $this->_response->setHeader(
-                        $response[Constants::RESPONSE_KEY_HEADERS][$i]['name'],
-                        $response[Constants::RESPONSE_KEY_HEADERS][$i]['value']
-                    );
-                }
-
-                $this->_response->sendHeaders();
-            }
-
-            $this->_response->setContent(
-                isset($response[Constants::RESPONSE_KEY_OUTPUT]) ? $response[Constants::RESPONSE_KEY_OUTPUT] : ''
-            );
-        }
-
-        return $this->_response;
     }
 
     /**
-     * Create exception in case CSRF validation failed.
-     * Return null if default exception will suffice.
-     *
-     * @param RequestInterface $request
-     *
-     * @return InvalidRequestException|null
-     * @SuppressWarnings(PMD.UnusedFormalParameter)
+     * @return void
+     * @throws BridgeConnectorException
      */
-    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
+    private function _loadRequestData()
     {
-        return null;
+        if ($this->_request->getParam('task')) {
+            $this->_requestData = $this->getRequest()->getParams();
+        } else {
+            throw new BridgeConnectorException(__('Task is required field'));
+        }
     }
 
     /**
-     * Perform custom request validation.
-     * Return null if default validation is needed.
-     *
      * @param RequestInterface $request
      *
      * @return bool|null
-     * @SuppressWarnings(PMD.UnusedFormalParameter)
      */
     public function validateForCsrf(RequestInterface $request): ?bool
     {
         return true;
+    }
+
+    /**
+     * @param RequestInterface $request
+     *
+     * @return InvalidRequestException|null
+     */
+    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
+    {
+        return null;
     }
 }

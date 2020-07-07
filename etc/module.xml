@@ -1,5 +1,8 @@
 <?xml version="1.0"?>
-
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
-    <module name="Emagicone_Connector" schema_version="1.0.4" setup_version="1.0.4" />
+    <module name="Emagicone_Connector" setup_version="2.3.1">
+        <sequence>
+            <module name="Emagicone_Core"/>
+        </sequence>
+    </module>
 </config>

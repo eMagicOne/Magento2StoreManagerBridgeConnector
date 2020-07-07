@@ -16,32 +16,28 @@
  *   along with Magento Store Manager Connector.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Emagicone\Connector\Setup;
+namespace Emagicone\Connector\Logger;
 
-use Emagicone\Connector\Helper\Data;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\Setup\UninstallInterface;
+use Magento\Framework\Logger\Handler\Base;
 
 /**
- * Class Install
+ * Class Handler
  *
- * @package Emagicone\Connector\Uninstall
+ * @author   Vitalii Drozd <vitaliidrozd@kommy.net>
+ * @license  https://emagicone.com/ eMagicOne Ltd. License
+ * @link     https://emagicone.com/
  */
-class Uninstall implements UninstallInterface
+class Handler extends Base
 {
-    private $data;
+    /**
+     * Logging level
+     * @var int
+     */
+    protected $loggerType = Logger::INFO;
 
-    public function __construct(
-        Data $data
-    ) {
-        $this->data = $data;
-    }
-
-    public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context)
-    {
-        $setup->startSetup();
-        $this->data->deleteConfigs();
-        $setup->endSetup();
-    }
+    /**
+     * File name
+     * @var string
+     */
+    protected $fileName = '/var/log/emagicone_connector.log';
 }

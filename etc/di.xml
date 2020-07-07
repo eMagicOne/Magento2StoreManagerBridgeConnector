@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Emagicone\Connector\Model\Resolver">
+        <arguments>
+            <argument name="modelsPool" xsi:type="array">
+                <!-- Use only class factories not a regular class!!! -->
+                <item name="db" xsi:type="object">Emagicone\Connector\Model\Database\DbFactory</item>
+                <item name="cache" xsi:type="object">Emagicone\Connector\Model\Cache\CacheFactory</item>
+                <item name="filesystem" xsi:type="object">Emagicone\Connector\Model\FileSystem\FileSystemFactory</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Emagicone\Connector\Model\Task\TaskRepository">
+        <arguments>
+            <argument name="tasksPool" xsi:type="array">
+                <!-- Use only class factories not a regular class!!! -->
+                <item name="get_sql" xsi:type="object">Emagicone\Connector\Model\Task\GetSqlFactory</item>
+                <item name="get_sql_file" xsi:type="object">Emagicone\Connector\Model\Task\GetSqlFileFactory</item>
+                <item name="get_version" xsi:type="object">Emagicone\Connector\Model\Task\GetVersionFactory</item>
+                <item name="get_config" xsi:type="object">Emagicone\Connector\Model\Task\GetConfigFactory</item>
+                <item name="run_indexer" xsi:type="object">Emagicone\Connector\Model\Task\RunIndexerFactory</item>
+                <item name="get_cache" xsi:type="object">Emagicone\Connector\Model\Task\GetCacheFactory</item>
+                <item name="clear_cache" xsi:type="object">Emagicone\Connector\Model\Task\ClearCacheFactory</item>
+                <item name="put_sql" xsi:type="object">Emagicone\Connector\Model\Task\PutSqlFactory</item>
+                <item name="get_file_list" xsi:type="object">Emagicone\Connector\Model\Task\GetFileListFactory</item>
+                <item name="get_ftp_files" xsi:type="object">Emagicone\Connector\Model\Task\GetFtpFilesFactory</item>
+                <item name="get_category_tree" xsi:type="object">Emagicone\Connector\Model\Task\GetCategoryTreeFactory</item>
+                <item name="get_file" xsi:type="object">Emagicone\Connector\Model\Task\GetFileFactory</item>
+                <item name="get_image" xsi:type="object">Emagicone\Connector\Model\Task\GetImageFactory</item>
+                <item name="set_file" xsi:type="object">Emagicone\Connector\Model\Task\SetFileFactory</item>
+                <item name="set_image" xsi:type="object">Emagicone\Connector\Model\Task\SetImageFactory</item>
+                <item name="delete_image" xsi:type="object">Emagicone\Connector\Model\Task\DeleteImageFactory</item>
+                <item name="delete_file" xsi:type="object">Emagicone\Connector\Model\Task\DeleteFileFactory</item>
+                <item name="get_cart_version" xsi:type="object">Emagicone\Connector\Model\Task\GetCartVersionFactory</item>
+                <item name="get_xml_data" xsi:type="object">Emagicone\Connector\Model\Task\GetXmlDataFactory</item>
+                <item name="check_data_changes" xsi:type="object">Emagicone\Connector\Model\Task\CheckDataChangesFactory</item>
+                <item name="get_store_file_archive" xsi:type="object">Emagicone\Connector\Model\Task\GetStoreFileArchiveFactory</item>
+                <item name="get_sql_progress" xsi:type="object">Emagicone\Connector\Model\Task\GetSqlProgressFactory</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Emagicone\Connector\Api\TaskInterface">
+        <plugin name="pre_checks" type="Emagicone\Connector\Plugin\PreChecks" sortOrder="1" disabled="false"/>
+    </type>
+    <type name="Emagicone\Connector\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Emagicone\Connector\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">BridgeConnector</argument>
+            <argument name="handlers"  xsi:type="array">
+                <item name="system" xsi:type="object">Emagicone\Connector\Logger\Handler</item>
+            </argument>
+        </arguments>
+    </type>
+    <preference for="Emagicone\Connector\Api\TaskRepositoryInterface" type="Emagicone\Connector\Model\Task\TaskRepository" />
+    <type name="Magento\Config\Model\Config\TypePool">
+        <arguments>
+            <argument name="sensitive" xsi:type="array">
+                <item name="emagicone_connector/access/password" xsi:type="string">1</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

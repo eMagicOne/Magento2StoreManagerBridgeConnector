@@ -16,32 +16,40 @@
  *   along with Magento Store Manager Connector.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Emagicone\Connector\Setup;
+namespace Emagicone\Connector\Model;
 
 use Emagicone\Connector\Helper\Data;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\Setup\UninstallInterface;
+use Emagicone\Connector\Logger\Logger;
 
 /**
- * Class Install
- *
- * @package Emagicone\Connector\Uninstall
+ * Class AbstractModel
+ * @author   Vitalii Drozd <vitaliidrozd@kommy.net>
+ * @license  https://emagicone.com/ eMagicOne Ltd. License
+ * @link     https://emagicone.com/
  */
-class Uninstall implements UninstallInterface
+abstract class AbstractModel
 {
-    private $data;
+    /**
+     * @var Logger
+     */
+    protected $_logger;
 
+    /**
+     * @var Data
+     */
+    protected $_helper;
+
+    /**
+     * AbstractModel constructor.
+     *
+     * @param Logger $logger
+     * @param Data $helper
+     */
     public function __construct(
-        Data $data
+        Logger $logger,
+        Data $helper
     ) {
-        $this->data = $data;
-    }
-
-    public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context)
-    {
-        $setup->startSetup();
-        $this->data->deleteConfigs();
-        $setup->endSetup();
+        $this->_logger = $logger;
+        $this->_helper = $helper;
     }
 }

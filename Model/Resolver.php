@@ -16,32 +16,45 @@
  *   along with Magento Store Manager Connector.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Emagicone\Connector\Setup;
+namespace Emagicone\Connector\Model;
 
-use Emagicone\Connector\Helper\Data;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\Setup\UninstallInterface;
+use Emagicone\Connector\Exception\BridgeConnectorException;
 
 /**
- * Class Install
+ * Class Resolver
  *
- * @package Emagicone\Connector\Uninstall
+ * @author   Vitalii Drozd <vitaliidrozd@kommy.net>
+ * @license  https://emagicone.com/ eMagicOne Ltd. License
+ * @link     https://emagicone.com/
  */
-class Uninstall implements UninstallInterface
+class Resolver
 {
-    private $data;
+    /**
+     * @var array
+     */
+    private $_modelsPool;
 
+    /**
+     * Resolver constructor.
+     *
+     * @param array $modelsPool
+     */
     public function __construct(
-        Data $data
+        array $modelsPool
     ) {
-        $this->data = $data;
+        $this->_modelsPool = $modelsPool;
     }
 
-    public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context)
+    /**
+     * @param string $modelName
+     * @return mixed
+     * @throws BridgeConnectorException
+     */
+    public function create(string $modelName)
     {
-        $setup->startSetup();
-        $this->data->deleteConfigs();
-        $setup->endSetup();
+        if (array_key_exists($modelName, $this->_modelsPool)) {
+            return $this->_modelsPool[$modelName]->create();
+        }
+        throw new BridgeConnectorException(__('Model %1 not found', $modelName));
     }
 }

@@ -16,32 +16,44 @@
  *   along with Magento Store Manager Connector.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Emagicone\Connector\Setup;
+namespace Emagicone\Connector\Model\Task;
 
-use Emagicone\Connector\Helper\Data;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\Setup\UninstallInterface;
+use Emagicone\Connector\Api\TaskRepositoryInterface;
+use Emagicone\Connector\Exception\BridgeConnectorException;
 
 /**
- * Class Install
+ * Class TaskRepository
  *
- * @package Emagicone\Connector\Uninstall
+ * @author   Vitalii Drozd <vitaliidrozd@kommy.net>
+ * @license  https://emagicone.com/ eMagicOne Ltd. License
+ * @link     https://emagicone.com/
  */
-class Uninstall implements UninstallInterface
+class TaskRepository implements TaskRepositoryInterface
 {
-    private $data;
+    /**
+     * @var array
+     */
+    private $_tasksPool;
 
+    /**
+     * TaskRepository constructor.
+     *
+     * @param array $tasksPool
+     */
     public function __construct(
-        Data $data
+        array $tasksPool
     ) {
-        $this->data = $data;
+        $this->_tasksPool = $tasksPool;
     }
 
-    public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context)
+    /**
+     * {@inheritDoc}
+     */
+    public function get($taskName)
     {
-        $setup->startSetup();
-        $this->data->deleteConfigs();
-        $setup->endSetup();
+        if (array_key_exists($taskName, $this->_tasksPool)) {
+            return $this->_tasksPool[$taskName]->create();
+        }
+        throw new BridgeConnectorException(__('Task %1 not found', $taskName));
     }
 }

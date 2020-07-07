@@ -16,32 +16,49 @@
  *   along with Magento Store Manager Connector.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace Emagicone\Connector\Setup;
+namespace Emagicone\Connector\Model\Config\Source;
 
-use Emagicone\Connector\Helper\Data;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\SchemaSetupInterface;
-use Magento\Framework\Setup\UninstallInterface;
+use Magento\Backup\Model\ResourceModel\Db;
+use Magento\Framework\Option\ArrayInterface;
 
 /**
- * Class Install
+ * Class Tables
  *
- * @package Emagicone\Connector\Uninstall
+ * @author   Vitalii Drozd <vitaliidrozd@kommy.net>
+ * @license  https://emagicone.com/ eMagicOne Ltd. License
+ * @link     https://emagicone.com/
  */
-class Uninstall implements UninstallInterface
+class Tables implements ArrayInterface
 {
-    private $data;
+    /**
+     * @var Db
+     */
+    private $_resource;
 
+    /**
+     * Tables constructor.
+     *
+     * @param Db $resource
+     */
     public function __construct(
-        Data $data
+        Db $resource
     ) {
-        $this->data = $data;
+        $this->_resource = $resource;
     }
 
-    public function uninstall(SchemaSetupInterface $setup, ModuleContextInterface $context)
+    /**
+     * @return array
+     */
+    public function toOptionArray()
     {
-        $setup->startSetup();
-        $this->data->deleteConfigs();
-        $setup->endSetup();
+        $tables = $this->_resource->getTables();
+        $returnArray = [];
+        foreach ($tables as $table) {
+            $returnArray[] = [
+                'value' => $table,
+                'label' => $table
+            ];
+        }
+        return $returnArray;
     }
 }

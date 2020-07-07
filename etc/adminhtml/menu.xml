@@ -1,7 +1,18 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
     <menu>
-        <add id="Emagicone_Connector::settings" title="Magento Store Manager Connector" module="Emagicone_Connector" sortOrder="100" dependsOnModule="Emagicone_Connector" resource="Emagicone_Connector::settings"/>
-        <add id="Emagicone_Connector::setting" title="Settings" module="Emagicone_Connector" parent="Emagicone_Connector::settings" action="connector/settings/edit" resource="Emagicone_Connector::setting"/>
+        <add id="Emagicone_Connector::emagicone_connector"
+             title="Store Manager"
+             module="Emagicone_Connector"
+             sortOrder="99"
+             parent="Emagicone_Core::emagicone"
+             resource="Emagicone_Connector::emagicone_connector"/>
+        <add id="Emagicone_Connector::emagicone_connector_configuration"
+             title="Connector Configuration"
+             module="Emagicone_Connector"
+             sortOrder="99"
+             parent="Emagicone_Connector::emagicone_connector"
+             action="adminhtml/system_config/edit/section/emagicone_connector"
+             resource="Emagicone_Connector::emagicone_connector_configuration"/>
     </menu>
 </config>

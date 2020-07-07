@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="emagicone_connector" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="0" showInStore="0">
+            <label>Store Manager Connector Configuration</label>
+            <tab>emagicone</tab>
+            <resource>Emagicone_Connector::config</resource>
+            <group id="access" translate="label" type="text" sortOrder="10" showInDefault="1">
+                <label>Access Settings</label>
+                <field id="enable" translate="label comment" type="select" sortOrder="10" showInDefault="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    <validate>required-entry</validate>
+                </field>
+                <field id="login" translate="label comment" type="text" sortOrder="10" showInDefault="1">
+                    <label>Login</label>
+                    <comment>Login for accessing Connector from eMagicOne Store Manager for Magento</comment>
+                    <validate>required-entry</validate>
+                    <depends>
+                        <field id="emagicone_connector/access/enable">1</field>
+                    </depends>
+                </field>
+                <field id="password" translate="label comment" type="password" sortOrder="20" showInDefault="1">
+                    <label>Password</label>
+                    <comment>Password for accessing Connector from eMagicOne Store Manager for Magento</comment>
+                    <validate>required-entry</validate>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <depends>
+                        <field id="emagicone_connector/access/enable">1</field>
+                    </depends>
+                </field>
+            </group>
+            <group id="settings" translate="label" type="text" sortOrder="10" showInDefault="1">
+                <label>Connector Settings</label>
+                <field id="package_size" translate="label comment" type="text" sortOrder="10" showInDefault="1">
+                    <label>Package Size</label>
+                    <comment>Size of parts for getting dump file (kB). Values between 100 and 30000. Default 1024</comment>
+                    <validate>required-entry validate-digits-range digits-range-100-30000 validate-digits</validate>
+                </field>
+                <field id="excluded_tables" translate="label comment" type="multiselect" sortOrder="20" showInDefault="1">
+                    <label>Exclude Tables</label>
+                    <source_model>Emagicone\Connector\Model\Config\Source\Tables</source_model>
+                    <comment>Do not get data from tables selected here. Use this to reduce size of the data retrieved from module</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
