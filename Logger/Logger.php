@@ -21,7 +21,7 @@ namespace Emagicone\Connector\Logger;
 /**
  * Class Logger
  *
- * @author   Vitalii Drozd <vitaliidrozd@kommy.net>
+ * @author   <outsource@emagicone.com>
  * @license  https://emagicone.com/ eMagicOne Ltd. License
  * @link     https://emagicone.com/
  */
