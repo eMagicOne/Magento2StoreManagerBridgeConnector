@@ -19,13 +19,13 @@
 namespace Emagicone\Connector\Helper;
 
 use Magento\Framework\App\CacheInterface;
+use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Filesystem\DirectoryList;
 use Magento\Framework\Serialize\SerializerInterface;
-use Magento\Framework\App\Config\ConfigResource\ConfigInterface;
 
 /**
  * Class Data
@@ -184,7 +184,7 @@ class Data extends AbstractHelper
     {
         $path = $this->_directoryList->getPath('tmp') . self::SAVE_DIR_NAME;
         if (!is_dir($path)) {
-            mkdir($path);
+            mkdir($path, 0777, true);
         }
         return $path;
     }
