@@ -84,9 +84,8 @@ class GetSqlFile extends AbstractTask implements TaskInterface
         if ($fileSize < $packageSize) {
             unlink($this->getHelper()->getSaveDir() . '/' . $this->_requestData['filename']);
         }
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        header('Pragma: no-cache');
+        header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0' );
+        header( 'Pragma: no-cache' );
         $this->setResponseData($output);
     }
 

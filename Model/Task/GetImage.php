@@ -106,7 +106,7 @@ class GetImage extends AbstractTask implements TaskInterface
                 $entityPath = '/catalog/product';
                 break;
             case self::CATEGORY:
-                $entityPath = '/catalog/category';
+                $entityPath = '/catalog/category/';
                 break;
             case self::ATTRIBUTE:
                 $entityPath = '/attribute/swatch';
