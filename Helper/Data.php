@@ -190,6 +190,15 @@ class Data extends AbstractHelper
     }
 
     /**
+     * @return bool
+     * @throws FileSystemException
+     */
+    public function checkTmpFolder()
+    {
+        return is_dir($this->_directoryList->getPath('tmp') . self::SAVE_DIR_NAME);
+    }
+
+    /**
      * @return string
      * @throws FileSystemException
      */

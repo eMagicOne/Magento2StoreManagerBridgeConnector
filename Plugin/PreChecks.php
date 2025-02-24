@@ -46,6 +46,13 @@ class PreChecks
                     'message' => 'Module is disabled'
                 ]
             );
+        } elseif (!$subject->getHelper()->checkTmpFolder()) {
+            $subject->setResponseData(
+                [
+                    'response_code' => $subject::ERROR_CODE_COMMON,
+                    'message' => 'Your Temporary Directory \'var/tmp/emagicone\' doesn\'t exist or is not writeable'
+                ]
+            );
         } elseif ($checkAuth['status'] === false) {
             if (isset($checkAuth['session_key'])) {
                 $subject->setResponseData(
@@ -93,6 +100,8 @@ class PreChecks
     }
 
     /**
+     * Check authorization to handle requests
+     *
      * @param $requestData
      * @param $subject
      * @return array
