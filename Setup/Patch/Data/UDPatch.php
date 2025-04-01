@@ -41,16 +41,21 @@ class UDPatch implements DataPatchInterface
          * This upgrade script set required tables as config record into 'core_config_data' table
          * and unset required tables from excluded_tables
          */
-        if (version_compare($productMetadata->getVersion(), '2.3.2', '<')) {
+        //if (version_compare($productMetadata->getVersion(), '2.3.2', '>')) {
             $tablePrefix = $this->deploymentConfig->get(ConfigOptionsListConstants::CONFIG_PATH_DB_PREFIX);
             $requiredTables = GlobalConstants::REQUIRED_TABLES;
             $requiredTablesRegexp = GlobalConstants::REQUIRED_TABLES_REGEXP;
+            $excludedTables = GlobalConstants::EXCLUDED_TABLES;
+
             if (!empty($tablePrefix)) {
                 foreach ($requiredTables as $index => $table) {
                     $requiredTables[$index] = "{$tablePrefix}$table";
                 }
                 foreach ($requiredTablesRegexp as $index => $regexp) {
                     $requiredTablesRegexp[$index] = "/{$tablePrefix}$regexp/";
+                }
+                foreach ($excludedTables as $index => $table) {
+                    $excludedTables[$index] = "{$tablePrefix}$table";
                 }
             } else {
                 foreach ($requiredTablesRegexp as $index => $regexp) {
@@ -69,8 +74,15 @@ class UDPatch implements DataPatchInterface
                 'path' => GlobalConstants::XML_PATH_EMAGICONE_CONNECTOR . '/settings/required_tables_regexp',
                 'value' => implode(',', $requiredTablesRegexp) . ',' . GlobalConstants::SM_TABLES_REGEXP,
             ];
+            $excluded_tables_data = [
+                'scope' => 'default',
+                'scope_id' => 0,
+                'path' => GlobalConstants::XML_PATH_EMAGICONE_CONNECTOR . '/settings/excluded_tables',
+                'value' => implode(',', $excludedTables),
+            ];
             $this->moduleDataSetup->getConnection()->insertOnDuplicate($this->moduleDataSetup->getTable('core_config_data'), $required_tables_data, ['value']);
             $this->moduleDataSetup->getConnection()->insertOnDuplicate($this->moduleDataSetup->getTable('core_config_data'), $required_tables_regexp_data, ['value']);
+            $this->moduleDataSetup->getConnection()->insertOnDuplicate($this->moduleDataSetup->getTable('core_config_data'), $excluded_tables_data, ['value']);
             $path = GlobalConstants::XML_PATH_EMAGICONE_CONNECTOR . '/settings/excluded_tables';
             $excludedTables = $this->scopeConfig->getValue($path);
             if (!empty($excludedTables)) {
@@ -87,7 +99,7 @@ class UDPatch implements DataPatchInterface
                 ];
                 $this->moduleDataSetup->getConnection()->insertOnDuplicate($this->moduleDataSetup->getTable('core_config_data'), $data, ['value']);
             }
-        }
+       // }
 
         $this->moduleDataSetup->getConnection()->endSetup();
     }

@@ -14,6 +14,17 @@ class GlobalConstants
         self::XML_PATH_EMAGICONE_CONNECTOR . '/settings/required_tables',
     ];
     const SM_TABLES_REGEXP = '/sm_.+/';
+    const EXCLUDED_TABLES = [
+        'admin_adobe_ims_webapi',
+        'cache_tag',
+        'captcha_log',
+        'cron_schedule',
+        'integration',
+        'oauth_token_request_log',
+        'session',
+        'ui_bookmark',
+        'vault_payment_token'
+    ];
     const REQUIRED_TABLES_REGEXP = [
         'catalog_category_flat_store_.+',
         'catalog_category_product_index_store.+',
