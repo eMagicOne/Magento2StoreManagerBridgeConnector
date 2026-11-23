@@ -18,6 +18,8 @@
 
 namespace Emagicone\Connector\Logger;
 
+use Magento\Framework\Logger\Monolog;
+
 /**
  * Class Logger
  *
@@ -25,6 +27,6 @@ namespace Emagicone\Connector\Logger;
  * @license  https://emagicone.com/ eMagicOne Ltd. License
  * @link     https://emagicone.com/
  */
-class Logger extends \Monolog\Logger
+class Logger extends Monolog
 {
 }

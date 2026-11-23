@@ -77,6 +77,7 @@ class PutSql extends AbstractTask implements TaskInterface
 
         $db = $this->_modelResolver->create('db');
 
+        $message = self::SUCCESSFUL . '|Data were posted successfully';
         foreach ($queries as $query) {
             if (empty($query)) {
                 continue;
@@ -89,7 +90,6 @@ class PutSql extends AbstractTask implements TaskInterface
                 $message = self::POST_ERROR_SQL_INDEX . '|' . $exception->getCode() . ' execution error';
                 break;
             }
-            $message = self::SUCCESSFUL . '|Data were posted successfully';
         }
         $this->setResponseData($message);
     }
