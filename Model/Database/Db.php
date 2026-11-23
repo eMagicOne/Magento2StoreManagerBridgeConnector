@@ -229,6 +229,7 @@ class Db extends AbstractModel
 
         foreach ($tables as $table) {
             $tableStatus = $this->getResource()->getTableStatus($table);
+            $rows = $tableStatus->getRows();
             if (!isset($this->_dumpGenerationParams['i'])
                 && !isset($this->_dumpGenerationParams['limit'])
                 && !isset($this->_dumpGenerationParams['multi_rows_length'])
@@ -237,36 +238,38 @@ class Db extends AbstractModel
                     $this->getResource()->getTableHeader($table) . $this->getResource()->getTableDropSql($table) . "\n"
                 );
                 $backup->write($this->getResource()->getTableCreateSql($table, false) . "\n");
-                if ($tableStatus->getRows()) {
-                    $backup->write($this->getResource()->getTableDataBeforeSql($table));
-                    if ($tableStatus->getDataLength() > self::BUFFER_LENGTH
-                        && $tableStatus->getAvgRowLength() < self::BUFFER_LENGTH
-                    ) {
-                        $limit = floor(self::BUFFER_LENGTH / max($tableStatus->getAvgRowLength(), 1));
-                        $multiRowsLength = ceil($tableStatus->getRows() / $limit);
-                    } elseif ($maxSize !== null && $tableStatus->getDataLength() > $maxSize - $size) {
-                        if ($tableStatus->getAvgRowLength() < $maxSize - $size) {
-                            $limit = floor(($maxSize - $size) / max($tableStatus->getAvgRowLength(), 1));
-                            $multiRowsLength = ceil($tableStatus->getRows() / $limit);
-                        } else {
-                            $limit = 1;
-                            $multiRowsLength = $tableStatus->getRows();
-                        }
-                    } else {
-                        $limit = $tableStatus->getRows();
-                        $multiRowsLength = 1;
-                    }
-                    $i = 0;
-
-                    $backup->write($this->getResource()->getTableDataAfterSql($table));
+                if (!$rows) {
+                    $this->_currentTableNumber++;
+                    continue;
                 }
+                $backup->write($this->getResource()->getTableDataBeforeSql($table));
+                if ($tableStatus->getDataLength() > self::BUFFER_LENGTH
+                    && $tableStatus->getAvgRowLength() < self::BUFFER_LENGTH
+                ) {
+                    $limit = floor(self::BUFFER_LENGTH / max($tableStatus->getAvgRowLength(), 1));
+                    $multiRowsLength = ceil($rows / $limit);
+                } elseif ($maxSize !== null && $tableStatus->getDataLength() > $maxSize - $size) {
+                    if ($tableStatus->getAvgRowLength() < $maxSize - $size) {
+                        $limit = floor(($maxSize - $size) / max($tableStatus->getAvgRowLength(), 1));
+                        $multiRowsLength = ceil($rows / $limit);
+                    } else {
+                        $limit = 1;
+                        $multiRowsLength = $rows;
+                    }
+                } else {
+                    $limit = $rows;
+                    $multiRowsLength = 1;
+                }
+                $i = 0;
+
+                $backup->write($this->getResource()->getTableDataAfterSql($table));
             } else {
                 $i = $this->_dumpGenerationParams['i'] + 1;
                 $limit = $this->_dumpGenerationParams['limit'];
                 $multiRowsLength = $this->_dumpGenerationParams['multi_rows_length'];
                 unset($this->_dumpGenerationParams);
             }
-            if ($tableStatus->getRows()) {
+            if ($rows) {
                 for (; $i < $multiRowsLength; $i++) {
                     $tableInsert = $this->getResource()->getTableDataSql($table, $limit, $i * $limit);
                     $backup->write($tableInsert);
@@ -339,11 +342,7 @@ class Db extends AbstractModel
     {
         $filename = $this->getTime() . '_' . self::BACKUP_TYPE;
 
-        $name = self::BACKUP_NAME;
-
-        if (!empty($name)) {
-            $filename .= '_' . $name;
-        }
+        $filename .= '_' . self::BACKUP_NAME;
 
         $filename .= $this->getBackupFileExtension();
 
